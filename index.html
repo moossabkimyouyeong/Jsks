@@ -2,39 +2,107 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Robux Generator - Roblox Style</title>
+<title>Roblox Avatar Check</title>
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        background: #E3E5E8; /* Roblox 밝은 회색 */
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
+    body{margin:0;padding:0;background:#E3E5E8;
+         font-family:Arial;display:flex;justify-content:center;
+         align-items:center;height:100vh;}
+    .box{width:360px;background:white;padding:25px;border-radius:12px;
+         text-align:center;box-shadow:0 0 15px rgba(0,0,0,0.15);}
+    input,button{width:100%;padding:12px;border-radius:10px;font-size:16px;}
+    input{border:1px solid #ccc;background:#F2F3F5;margin-top:10px;}
+    button{border:none;background:#00A2FF;color:white;margin-top:15px;font-weight:bold;}
+    #avatar{width:140px;height:140px;border-radius:12px;border:2px solid #ddd;display:none;margin:15px auto;}
+    .step{display:none;} .show{display:block;}
+</style>
+</head>
+<body>
 
-    .container {
-        width: 380px;
-        background: #FFFFFF;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        text-align: center;
-    }
+<div class="box">
 
-    .logo {
-        width: 110px;
-        margin-bottom: 15px;
-    }
+    <!-- STEP 1 -->
+    <div id="step1" class="step show">
+        <h2>Step 1 — Username</h2>
+        <input id="username" placeholder="Roblox Username">
+        <button onclick="loadAvatar()">Next</button>
+    </div>
 
-    h2 {
-        margin: 0 0 20px 0;
-        font-size: 22px;
-        color: #111;
-    }
+    <!-- STEP 2 -->
+    <div id="step2" class="step">
+        <h2>Step 2 — Confirm Avatar</h2>
+        <img id="avatar">
+        <h3 id="name"></h3>
+        <button onclick="goStep3()">Yes, this is me</button>
+        <button style="background:#bbb;color:#333;" onclick="retry()">No, go back</button>
+    </div>
 
+    <!-- STEP 3 -->
+    <div id="step3" class="step">
+        <h2>Step 3 — Select Robux</h2>
+        <select id="robux">
+            <option value="">Choose</option>
+            <option>400 Robux</option><option>800 Robux</option>
+            <option>1700 Robux</option><option>4500 Robux</option><option>10000 Robux</option>
+        </select>
+        <button onclick="finish()">Generate</button>
+    </div>
+
+    <!-- STEP 4 -->
+    <div id="step4" class="step">
+        <h2>Processing…</h2>
+        <p>✅ Completed!</p>
+    </div>
+
+</div>
+
+<script>
+async function loadAvatar() {
+    const name = username.value.trim();
+    if (!name) return alert("Enter name");
+
+    // 1) username → userId (공식 API는 fetch 가능)
+    const res = await fetch("https://users.roblox.com/v1/usernames/users", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({usernames:[name]})
+    });
+    const data = await res.json();
+    if (!data.data || !data.data[0] || !data.data[0].id)
+        return alert("User not found");
+
+    const userId = data.data[0].id;
+
+    // ✅ 2) img src 직접 세팅 (CORS 없음, 무조건 뜸)
+    const directURL =
+        `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
+
+    avatar.src = directURL;
+    avatar.style.display = "block";
+    nameBox = document.getElementById("name");
+    nameBox.innerText = name;
+
+    step1.classList.remove("show");
+    step2.classList.add("show");
+}
+
+function goStep3(){
+    step2.classList.remove("show");
+    step3.classList.add("show");
+}
+
+function retry(){
+    step2.classList.remove("show");
+    step1.classList.add("show");
+}
+
+function finish(){
+    step3.classList.remove("show");
+    step4.classList.add("show");
+}
+</script>
+
+</body>
+</html>
     input, select {
         width: 100%;
         padding: 12px;
