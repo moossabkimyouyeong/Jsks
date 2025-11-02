@@ -2,39 +2,201 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Robux Generator – 3 Steps</title>
+<title>Robux Generator - Roblox Style</title>
 <style>
     body {
         margin: 0;
         padding: 0;
-        background: #1E88E5; /* 파란 메인 색 */
+        background: #E3E5E8; /* Roblox 밝은 회색 */
         font-family: Arial, sans-serif;
-        color: white;
-        height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
+        height: 100vh;
     }
 
-    .box {
-        width: 90%;
-        max-width: 420px;
-        background: rgba(255,255,255,0.15);
+    .container {
+        width: 380px;
+        background: #FFFFFF;
         padding: 30px;
-        border-radius: 16px;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
         text-align: center;
     }
 
-    h2 {
-        margin-top: 0;
+    .logo {
+        width: 110px;
         margin-bottom: 15px;
-        font-size: 24px;
-        font-weight: bold;
     }
 
-    /* 공통 입력 / 버튼 */
+    h2 {
+        margin: 0 0 20px 0;
+        font-size: 22px;
+        color: #111;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 12px;
+        margin-top: 12px;
+        border: 1px solid #C3C4C6;
+        border-radius: 8px;
+        font-size: 16px;
+        background: #F2F3F5;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 20px;
+        background: #00A2FF; /* Roblox 파란 버튼 */
+        border: none;
+        color: white;
+        border-radius: 8px;
+        font-size: 17px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #0086D6;
+    }
+
+    /* Step pages */
+    .step { display: none; }
+    .active { display: block; }
+
+    /* Avatar */
+    #avatarImg {
+        width: 120px;
+        height: 120px;
+        border-radius: 10px;
+        margin: 12px auto;
+        display: none;
+        border: 2px solid #E3E5E8;
+    }
+
+    #avatarName {
+        font-size: 16px;
+        margin-top: 6px;
+        display: none;
+    }
+
+    /* Loading steps */
+    .loadstep {
+        opacity: 0.3;
+        margin: 8px 0;
+    }
+
+    .highlight {
+        opacity: 1;
+        font-weight: bold;
+        color: #00A2FF;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- STEP 1 -->
+    <div id="step1" class="step active">
+        <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/1/16/Roblox_Logo_2022.png">
+        <h2>Step 1 — Enter Username</h2>
+
+        <img id="avatarImg">
+        <div id="avatarName"></div>
+
+        <input id="username" type="text" placeholder="Roblox Username" onblur="loadAvatar()">
+        <button onclick="nextStep2()">Next</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" class="step">
+        <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/1/16/Roblox_Logo_2022.png">
+        <h2>Step 2 — Select Robux</h2>
+
+        <select id="robux">
+            <option value="">Choose</option>
+            <option value="400">400 Robux</option>
+            <option value="800">800 Robux</option>
+            <option value="1700">1700 Robux</option>
+            <option value="4500">4500 Robux</option>
+            <option value="10000">10000 Robux</option>
+        </select>
+
+        <button onclick="nextStep3()">Generate</button>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step3" class="step">
+        <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/1/16/Roblox_Logo_2022.png">
+        <h2>Processing…</h2>
+
+        <div id="l1" class="loadstep">Connecting...</div>
+        <div id="l2" class="loadstep">Checking username...</div>
+        <div id="l3" class="loadstep">Applying package...</div>
+        <div id="l4" class="loadstep">Finalizing...</div>
+        <div id="l5" class="loadstep">✅ Completed!</div>
+    </div>
+
+</div>
+
+<script>
+// ✅ Step 이동
+function nextStep2() {
+    if (!username.value) return alert("Enter username");
+    step1.classList.remove("active");
+    step2.classList.add("active");
+}
+
+function nextStep3() {
+    if (!robux.value) return alert("Select Robux amount");
+    step2.classList.remove("active");
+    step3.classList.add("active");
+
+    // 단계별 로딩 진행
+    let i = 1;
+    function run() {
+        document.getElementById("l" + i).classList.add("highlight");
+        i++;
+        if (i <= 5) setTimeout(run, 900);
+    }
+    run();
+}
+
+// ✅ 아바타 로딩 (로컬에서도 100% 작동하는 프록시 방식)
+async function loadAvatar() {
+    const name = username.value.trim();
+    if (!name) return;
+
+    // 1) username → userId
+    const res = await fetch("https://users.roblox.com/v1/usernames/users", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({usernames: [name]})
+    });
+    const data = await res.json();
+    if (!data.data || !data.data[0].id) {
+        avatarName.innerText = "User not found";
+        avatarName.style.display = "block";
+        avatarImg.style.display = "none";
+        return;
+    }
+
+    const userId = data.data[0].id;
+
+    // 2) userId → 프록시 서버에서 이미지 가져옴 (로컬에서도 작동)
+    const imgUrl = `https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`;
+
+    avatarImg.src = imgUrl;
+    avatarImg.style.display = "block";
+    avatarName.innerText = name;
+    avatarName.style.display = "block";
+}
+</script>
+
+</body>
+</html>    /* 공통 입력 / 버튼 */
     input, select {
         width: 100%;
         padding: 14px;
