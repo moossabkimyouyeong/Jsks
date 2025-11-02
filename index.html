@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Robux Generator – New UI</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #111;       /* 전체 어둡게 */
+        font-family: Arial, sans-serif;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .container {
+        width: 95%;
+        max-width: 420px;
+        background: #1A1A1A;
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 0 25px rgba(0,0,0,0.6);
+    }
+
+    /* 상단 헤더 */
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .header img {
+        width: 85px;
+        margin-bottom: 10px;
+    }
+
+    .title {
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    /* 아바타 영역 */
+    .avatar-box {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    #avatarImg {
+        width: 110px;
+        height: 110px;
+        border-radius: 12px;
+        border: 2px solid #00A2FF;
+        display: none;
+    }
+
+    #avatarName {
+        margin-top: 10px;
+        display: none;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    /* 입력 UI */
+    input, select {
+        width: 100%;
+        padding: 14px;
+        margin-top: 15px;
+        background: #2A2A2A;
+        border: 1px solid #444;
+        border-radius: 10px;
+        color: white;
+        font-size: 16px;
+    }
+
+    input:focus, select:focus {
+        outline: 2px solid #00A2FF;
+    }
+
+    /* 버튼 */
+    button {
+        width: 100%;
+        padding: 15px;
+        margin-top: 20px;
+        background: #00A2FF;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #008BDD;
+    }
+
+    /* 로딩 부분 */
+    #loadingBox {
+        margin-top: 25px;
+        display: none;
+    }
+
+    .step {
+        opacity: 0.3;
+        margin: 6px 0;
+        font-size: 15px;
+    }
+
+    .active {
+        opacity: 1;
+        color: #00D0FF;
+        font-weight: bold;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- 상단 Roblox 로고 -->
+    <div class="header">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/16/Roblox_Logo_2022.png">
+        <div class="title">Robux Generator</div>
+    </div>
+
+    <!-- 아바타 -->
+    <div class="avatar-box">
+        <img id="avatarImg">
+        <div id="avatarName"></div>
+    </div>
+
+    <!-- 입력창 -->
+    <input type="text" id="user" placeholder="Roblox Username" onblur="loadAvatar()">
+
+    <select id="robux">
+        <option value="">Select Robux Amount</option>
+        <option value="400">400 Robux</option>
+        <option value="800">800 Robux</option>
+        <option value="1700">1,700 Robux</option>
+        <option value="4500">4,500 Robux</option>
+        <option value="10000">10,000 Robux</option>
+    </select>
+
+    <button onclick="start()">Generate</button>
+
+    <!-- 로딩 단계 -->
+    <div id="loadingBox">
+        <div class="step" id="s1">• Connecting to Roblox servers…</div>
+        <div class="step" id="s2">• Checking username…</div>
+        <div class="step" id="s3">• Applying selected Robux…</div>
+        <div class="step" id="s4">• Processing…</div>
+        <div class="step" id="s5">• Finalizing…</div>
+        <div class="step" id="s6">✅ Completed!</div>
+    </div>
+
+</div>
+
+<script>
+// ✅ 아바타 자동 불러오기
+async function loadAvatar() {
+    const username = document.getElementById("user").value.trim();
+    const img = document.getElementById("avatarImg");
+    const nameBox = document.getElementById("avatarName");
+
+    if (!username) return;
+
+    let res = await fetch("https://users.roblox.com/v1/usernames/users", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({usernames: [username]})
+    });
+
+    let data = await res.json();
+
+    if (!data.data || !data.data[0].id) {
+        img.style.display = "none";
+        nameBox.style.display = "block";
+        nameBox.innerHTML = "❌ User not found";
+        return;
+    }
+
+    let userId = data.data[0].id;
+
+    let avatar = await fetch(
+        `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`
+    );
+    let avatarData = await avatar.json();
+
+    img.src = avatarData.data[0].imageUrl;
+    img.style.display = "block";
+
+    nameBox.textContent = username;
+    nameBox.style.display = "block";
+}
+
+// ✅ 로딩 절차
+function start() {
+    const u = document.getElementById("user").value;
+    const r = document.getElementById("robux").value;
+
+    if (!u || !r) {
+        alert("Please enter username and Robux amount.");
+        return;
+    }
+
+    document.getElementById("loadingBox").style.display = "block";
+
+    let step = 1;
+    function showStep() {
+        document.getElementById("s" + step).classList.add("active");
+        step++;
+        if (step <= 6) setTimeout(showStep, 900);
+    }
+
+    showStep();
+}
+</script>
+
+</body>
+</html>
