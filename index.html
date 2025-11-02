@@ -2,175 +2,185 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Robux Generator – New UI</title>
+<title>Robux Generator – 3 Steps</title>
 <style>
     body {
         margin: 0;
         padding: 0;
-        background: #111;       /* 전체 어둡게 */
+        background: #1E88E5; /* 파란 메인 색 */
         font-family: Arial, sans-serif;
         color: white;
+        height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
     }
 
-    .container {
-        width: 95%;
+    .box {
+        width: 90%;
         max-width: 420px;
-        background: #1A1A1A;
+        background: rgba(255,255,255,0.15);
+        padding: 30px;
         border-radius: 16px;
-        padding: 25px;
-        box-shadow: 0 0 25px rgba(0,0,0,0.6);
-    }
-
-    /* 상단 헤더 */
-    .header {
+        backdrop-filter: blur(10px);
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
         text-align: center;
-        margin-bottom: 20px;
     }
 
-    .header img {
-        width: 85px;
-        margin-bottom: 10px;
-    }
-
-    .title {
-        font-size: 22px;
+    h2 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 24px;
         font-weight: bold;
     }
 
-    /* 아바타 영역 */
-    .avatar-box {
-        text-align: center;
-        margin-top: 15px;
-    }
-
-    #avatarImg {
-        width: 110px;
-        height: 110px;
-        border-radius: 12px;
-        border: 2px solid #00A2FF;
-        display: none;
-    }
-
-    #avatarName {
-        margin-top: 10px;
-        display: none;
-        font-size: 16px;
-        font-weight: bold;
-    }
-
-    /* 입력 UI */
+    /* 공통 입력 / 버튼 */
     input, select {
         width: 100%;
         padding: 14px;
         margin-top: 15px;
-        background: #2A2A2A;
-        border: 1px solid #444;
         border-radius: 10px;
-        color: white;
+        border: none;
         font-size: 16px;
+        outline: none;
     }
 
-    input:focus, select:focus {
-        outline: 2px solid #00A2FF;
-    }
-
-    /* 버튼 */
     button {
         width: 100%;
         padding: 15px;
         margin-top: 20px;
-        background: #00A2FF;
+        background: white;
+        color: #1565C0;
         border: none;
         border-radius: 10px;
-        color: white;
+        cursor: pointer;
         font-size: 18px;
         font-weight: bold;
-        cursor: pointer;
     }
 
     button:hover {
-        background: #008BDD;
+        background: #e8e8e8;
     }
 
-    /* 로딩 부분 */
-    #loadingBox {
-        margin-top: 25px;
+    /* 아바타 */
+    #avatarImg {
+        width: 120px;
+        height: 120px;
+        border-radius: 14px;
+        border: 3px solid white;
+        display: none;
+        margin: 10px auto;
+    }
+
+    #avatarName {
+        display: none;
+        margin-top: 8px;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    /* 숨김 */
+    .hidden {
         display: none;
     }
 
+    /* 로딩 텍스트 */
     .step {
         opacity: 0.3;
-        margin: 6px 0;
-        font-size: 15px;
+        margin-top: 8px;
+        font-size: 16px;
     }
-
     .active {
         opacity: 1;
-        color: #00D0FF;
         font-weight: bold;
     }
 </style>
 </head>
-
 <body>
 
-<div class="container">
+<div class="box">
 
-    <!-- 상단 Roblox 로고 -->
-    <div class="header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/1/16/Roblox_Logo_2022.png">
-        <div class="title">Robux Generator</div>
-    </div>
+    <!-- STEP 1: Username & Avatar -->
+    <div id="step1">
+        <h2>Step 1. Enter Username</h2>
 
-    <!-- 아바타 -->
-    <div class="avatar-box">
         <img id="avatarImg">
         <div id="avatarName"></div>
+
+        <input type="text" id="username" placeholder="Roblox Username" onblur="loadAvatar()">
+        <button onclick="goStep2()">Next</button>
     </div>
 
-    <!-- 입력창 -->
-    <input type="text" id="user" placeholder="Roblox Username" onblur="loadAvatar()">
+    <!-- STEP 2: Robux Amount -->
+    <div id="step2" class="hidden">
+        <h2>Step 2. Select Robux</h2>
 
-    <select id="robux">
-        <option value="">Select Robux Amount</option>
-        <option value="400">400 Robux</option>
-        <option value="800">800 Robux</option>
-        <option value="1700">1,700 Robux</option>
-        <option value="4500">4,500 Robux</option>
-        <option value="10000">10,000 Robux</option>
-    </select>
+        <select id="robux">
+            <option value="">Choose Amount</option>
+            <option value="400">400 Robux</option>
+            <option value="800">800 Robux</option>
+            <option value="1700">1,700 Robux</option>
+            <option value="4500">4,500 Robux</option>
+            <option value="10000">10,000 Robux</option>
+        </select>
+        <button onclick="goStep3()">Next</button>
+    </div>
 
-    <button onclick="start()">Generate</button>
+    <!-- STEP 3: Loading -->
+    <div id="step3" class="hidden">
+        <h2>Step 3. Processing</h2>
 
-    <!-- 로딩 단계 -->
-    <div id="loadingBox">
-        <div class="step" id="s1">• Connecting to Roblox servers…</div>
-        <div class="step" id="s2">• Checking username…</div>
-        <div class="step" id="s3">• Applying selected Robux…</div>
-        <div class="step" id="s4">• Processing…</div>
-        <div class="step" id="s5">• Finalizing…</div>
-        <div class="step" id="s6">✅ Completed!</div>
+        <div class="step" id="l1">Connecting...</div>
+        <div class="step" id="l2">Checking username...</div>
+        <div class="step" id="l3">Applying Robux...</div>
+        <div class="step" id="l4">Finalizing...</div>
+        <div class="step" id="l5">✅ Completed!</div>
     </div>
 
 </div>
 
 <script>
-// ✅ 아바타 자동 불러오기
+// ✅ STEP 이동
+function goStep2() {
+    if (!document.getElementById("username").value) {
+        alert("Enter username first.");
+        return;
+    }
+    step1.style.display = "none";
+    step2.style.display = "block";
+}
+
+function goStep3() {
+    if (!document.getElementById("robux").value) {
+        alert("Select Robux amount.");
+        return;
+    }
+    step2.style.display = "none";
+    step3.style.display = "block";
+
+    // 로딩 진행
+    let current = 1;
+    function showNext() {
+        document.getElementById("l" + current).classList.add("active");
+        current++;
+        if (current <= 5) setTimeout(showNext, 900);
+    }
+    showNext();
+}
+
+// ✅ 아바타 자동 로딩
 async function loadAvatar() {
-    const username = document.getElementById("user").value.trim();
+    const username = document.getElementById("username").value.trim();
     const img = document.getElementById("avatarImg");
     const nameBox = document.getElementById("avatarName");
 
     if (!username) return;
 
+    // Username → UserId
     let res = await fetch("https://users.roblox.com/v1/usernames/users", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({usernames: [username]})
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usernames: [username] })
     });
 
     let data = await res.json();
@@ -184,38 +194,18 @@ async function loadAvatar() {
 
     let userId = data.data[0].id;
 
+    // UserId → Avatar
     let avatar = await fetch(
         `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`
     );
+
     let avatarData = await avatar.json();
 
     img.src = avatarData.data[0].imageUrl;
     img.style.display = "block";
 
-    nameBox.textContent = username;
+    nameBox.innerHTML = username;
     nameBox.style.display = "block";
-}
-
-// ✅ 로딩 절차
-function start() {
-    const u = document.getElementById("user").value;
-    const r = document.getElementById("robux").value;
-
-    if (!u || !r) {
-        alert("Please enter username and Robux amount.");
-        return;
-    }
-
-    document.getElementById("loadingBox").style.display = "block";
-
-    let step = 1;
-    function showStep() {
-        document.getElementById("s" + step).classList.add("active");
-        step++;
-        if (step <= 6) setTimeout(showStep, 900);
-    }
-
-    showStep();
 }
 </script>
 
